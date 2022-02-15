@@ -89,7 +89,6 @@ const Navbar = () => {
             </div>
           </button>
 
-          <SwitchLang />
 
           {siteConfig.links.length !== 0 &&
             siteConfig.links.map((l: { name: string; link: string }) => (
