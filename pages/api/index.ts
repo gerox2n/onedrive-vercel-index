@@ -11,7 +11,7 @@ import { getOdAuthTokens, storeOdAuthTokens } from '../../utils/odAuthTokenStore
 import { runCorsMiddleware } from './raw'
 
 const basePath = pathPosix.resolve('/', siteConfig.baseDirectory)
-const clientSecret = revealObfuscatedToken(apiConfig.obfuscatedClientSecret)
+const clientSecret = revealObfuscatedToken(process.env.API_CLIENT_SECRET ?? '')
 
 /**
  * Encode the path of the file relative to the base directory
@@ -50,7 +50,7 @@ export async function getAccessToken(): Promise<string> {
 
   // Fetch new access token with in storage refresh token
   const body = new URLSearchParams()
-  body.append('client_id', apiConfig.clientId)
+  body.append('client_id', process.env.API_CLIENT_ID ?? '')
   body.append('redirect_uri', apiConfig.redirectUri)
   body.append('client_secret', clientSecret)
   body.append('refresh_token', refreshToken)
