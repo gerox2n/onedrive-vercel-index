@@ -20,11 +20,16 @@ const MarkdownPreview: FC<{
   file: any
   path: string
   standalone?: boolean
-}> = ({ file, path, standalone = true }) => {
+  proxy?: boolean
+}> = ({ file, path, standalone = true, proxy = false }) => {
   // The parent folder of the markdown file, which is also the relative image folder
   const parentPath = standalone ? path.substring(0, path.lastIndexOf('/')) : path
 
-  const { response: content, error, validating } = useFileContent(`/api/raw/?path=${parentPath}/${file.name}`, path)
+  const {
+    response: content,
+    error,
+    validating,
+  } = useFileContent(`/api/raw/?path=${parentPath}/${file.name}${proxy ? `&proxy=true` : ''}`, path)
   const { t } = useTranslation()
 
   // Check if the image is relative path instead of a absolute url
@@ -116,6 +121,10 @@ const MarkdownPreview: FC<{
           {/* Using rehypeRaw to render HTML inside Markdown is potentially dangerous, use under safe environments. (#18) */}
           <ReactMarkdown
             remarkPlugins={[gfm, remarkMath]}
+            // The type error is introduced by caniuse-lite upgrade.
+            // Since type errors occur often in remark toolchain and the use is so common,
+            // ignoring it shoudld be safe enough.
+            // @ts-ignore
             rehypePlugins={[rehypeKatex, rehypeRaw]}
             components={customRenderer}
           >
