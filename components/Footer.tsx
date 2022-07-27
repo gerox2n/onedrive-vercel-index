@@ -1,7 +1,11 @@
 import config from '../config/site.config'
 
 const createFooterMarkup = () => {
-  return {
+  return process.env.VERCEL_GIT_COMMIT_SHA
+  ? {
+    __html: config.footer + ' | ' + process.env.VERCEL_GIT_COMMIT_SHA?.slice(0,7),
+  }
+  : {
     __html: config.footer,
   }
 }
