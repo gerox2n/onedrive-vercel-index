@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-import { encodePath, getAccessToken } from '.'
+import { encodePath, getAccessToken, checkAuthRoute } from '.'
 import apiConfig from '../../config/api.config'
 import siteConfig from '../../config/site.config'
 
@@ -31,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Query parameter from request
   const { q: searchQuery = '' } = req.query
+  const odTokenHeader = (req.headers['od-protected-token'] as string) ?? ''
 
   // Set edge function caching for faster load times, check docs:
   // https://vercel.com/docs/concepts/functions/edge-caching
@@ -42,6 +43,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const encodedPath = searchRootPath === '' ? searchRootPath : searchRootPath + ':'
 
     const searchApi = `${apiConfig.driveApi}/root${encodedPath}/search(q='${sanitiseQuery(searchQuery)}')`
+
+    const { code, message } = await checkAuthRoute('/', accessToken, odTokenHeader)
+    if (code !== 200) {
+      res.status(code).json({ error: message })
+      return
+    }
 
     try {
       const { data } = await axios.get(searchApi, {
